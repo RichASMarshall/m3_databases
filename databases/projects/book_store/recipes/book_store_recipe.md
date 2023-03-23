@@ -1,28 +1,57 @@
-# Artists Model and Repository Classes Design Recipe
+# Books Model and Repository Classes Design Recipe
 
 _Copy this recipe template to design and implement Model and Repository classes for a database table._
 
-## 1. Design and create the Table
+## 1. Design and create the Table and extract nouns from the user stories or specification
+
+# EXAMPLE USER STORY:
+# (analyse only the relevant part - here the final line).
+
+# As a music lover,
+# So I can organise my records,
+# I want to keep a list of albums' titles.
+
+# As a music lover,
+# So I can organise my records,
+# I want to keep a list of albums' release year.
+
+
+# Nouns:
+
+# album, title, release year
+
+
+USER STORY:
+
+As a book lover,
+So I can organise my books,
+I want to keep a list of ids' titles' authors.
+
+
+Nouns:
+
+id, title, author name
+
 
 If the table is already created in the database, you can skip this step.
 
 Otherwise, [follow this recipe to design and create the SQL schema for your table](./single_table_design_recipe_template.md).
 
-*In this template, we'll use an example table `artists`*
+*In this template, we'll use an example table `books`*
 
-```ruby
-## EXAMPLE
-## Table: students
+```sql
+-- EXAMPLE
+-- Table: students
 
-## Columns:
-## id | name | cohort_name
+-- Columns:
+-- id | name | cohort_name
 
 
-# My Changed Code Below.
-# Table: students
+My Changed Code Below.
+Table: books
 
-# Columns:
-# id | name | genre
+Columns:
+id | title | author_name
 ```
 
 ## 2. Create Test SQL seeds
@@ -59,13 +88,13 @@ If seed data is provided (or you already created it), you can skip this step.
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE artists RESTART IDENTITY; -- replace with your own table name.
+TRUNCATE TABLE books RESTART IDENTITY; -- replace with your own table name.
 
 -- Below this line there should only be `INSERT` statements.
 -- Replace these statements with your own seed data.
 
-INSERT INTO artists (name, genre) VALUES ('Pixies', 'Rock');
-INSERT INTO artists (name, genre) VALUES ('ABBA', 'Pop');
+INSERT INTO books (id, title, author_name) VALUES ('1','Nineteen Eighty-Four', 'George Orwell');
+INSERT INTO books (id, title, author_name) VALUES ('2','Mrs Dalloway', 'Virginia Woolf');
 -- My End.
 ```
 
@@ -95,16 +124,16 @@ Usually, the Model class name will be the capitalised table name (single instead
 
 
 # My Changed Code Below.
-# Table name: artists
+# Table name: books
 
 # Model class
-# (in lib/artist.rb)
-class Artist
+# (in lib/book.rb)
+class Book
 end
 
 # Repository class
-# (in lib/artist_repository.rb)
-class ArtistRepository
+# (in lib/book_repository.rb)
+class BookRepository
 end
 # My End.
 ```
@@ -139,24 +168,27 @@ Define the attributes of your Model class. You can usually map the table columns
 
 
 # My Changed Code Below.
-# Table name: artists
+# Table name: books
 
 # Model class
-# (in lib/artist.rb)
+# (in lib/book.rb)
 
-class Artist
+class Book
 
   # Replace the attributes by your own columns.
-  attr_accessor :id, :name, :genre
+  attr_accessor :id, :name, :author_name
+  :id should be a number
+  :title should be a string
+  :author_name should be a string
 end
 
 # The keyword attr_accessor is a special Ruby feature
 # which allows us to set and get attributes on an object,
 # here's an example:
 #
-# artist = Artist.new
-# artist.name = 'Pixies'
-# artist.name
+# book = Book.new
+# book.name = 'Nineteen Eighty-Four'
+# book.name
 # My End.
 ```
 
@@ -208,21 +240,21 @@ Using comments, define the method signatures (arguments and return value) and wh
 # end
 
 
-# My Changed Code Below.
-# Table name: artists
+# My Changed Code Below. in the video only part of the code above was used.
+# Table name: books
 
 # Repository class
-# (in lib/artist_repository.rb)
+# (in lib/book_repository.rb)
 
-class ArtistRepository
+class BookRepository
 
   # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, genre FROM artists;
+    # SELECT id, name, author_name FROM books;
 
-    # Returns an array of Artist objects.
+    # Returns an array of Book objects.
   end
 end
 # My End.
@@ -268,16 +300,19 @@ These examples will later be encoded as RSpec tests.
 # # Add more examples for each method
 
 
-# My Changed Code Below.
+# My Changed Code Below. In the video only part of the code above was used.
 # 1
-# Get all artists
+# Get all books
 
-repo = ArtistRepository.new
+repo = BookRepository.new
 
-artists = repo.all
-artists.length # => 2
-artists.first.id # => '1'
-artists.first.name # => 'Pixies'
+books = repo.all
+
+books.length # => 2
+
+books.first.id # => 1
+books.first.title # => 'Nineteen Eighty-Four'
+books.first.author_name # => 'George Orwell'
 # My End.
 ```
 
@@ -312,9 +347,9 @@ This is so you get a fresh table contents every time you run the test suite.
 # My Changed Code Below.
 # file: spec/artist_repository_spec.rb
 
-def reset_artists_table
-  seed_sql = File.read('spec/seeds_artists.sql')
-  connection = PG.connect({ host: '127.0.0.1', dbname: 'music_library_test' })
+def reset_books_table
+  seed_sql = File.read('spec/seeds_books.sql')
+  connection = PG.connect({ host: '127.0.0.1', dbname: 'books' })
   connection.exec(seed_sql)
 end
 
